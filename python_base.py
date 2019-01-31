@@ -47,7 +47,7 @@
     x<<y, x>>y                                   # 位操作：x左移、右移y位
     +, -, *, /, //, %, **                        # 真除法、floor除法：返回不大于真除法结果的整数值、取余、幂运算
     -x, +x, ~x                                   # 一元减法、识别、按位求补（取反）
-    x[i], x[i:j:k]                               # 索引、分片、调用
+    x[i], x[i:j:k]                               # 索引、分片
     int(3.14), float(3)                          # 强制类型转换
     
 #-- 整数可以利用bit_length函数测试所占的位数
@@ -80,7 +80,7 @@
     set不记录元素位置或者插入点, 因此不支持indexing, slicing, 或其它类序列的操作
     """
     s = set([3,5,9,10])                          # 创建一个数值集合，返回{3, 5, 9, 10}
-    t = set("Hello")                             # 创建一个唯一字符的集合返回{}
+    t = set("Hello")                             # 创建一个字符的集合，返回{'l', 'H', 'e', 'o'}
     a = t | s;    t.union(s)                     # t 和 s的并集
     b = t & s;    t.intersection(s)              # t 和 s的交集
     c = t – s;    t.difference(s)                # 求差集（项在t中, 但不在s中）
@@ -285,14 +285,14 @@
         def __missing__(self, key):
             self[key] = []
             return self[key]
-    dct = Dict()
+    dct = dict()
     dct["foo"].append(1)    # 这有点类似于collections.defalutdict
     dct["foo"]              # [1]
     
-#-- 元组和列表的唯一区别在于元组是不可变对象，列表时可变对象
+#-- 元组和列表的唯一区别在于元组是不可变对象，列表是可变对象
     a = [1, 2, 3]           # a[1] = 0, OK
     a = (1, 2, 3)           # a[1] = 0, Error
-    a = ([1, 2])            # a[0][1] = 0, OK
+    a = ([1, 2],)           # a[0][1] = 0, OK
     a = [(1, 2)]            # a[0][1] = 0, Error
     
 #-- 元组的特殊语法: 逗号和圆括号
@@ -315,11 +315,15 @@
     fp.isatty()                             # 文件是否是一个终端设备文件（unix系统中的）
     fp.tell()                               # 返回文件操作标记的当前位置，以文件的开头为原点
     fp.next()                               # 返回下一行，并将文件操作标记位移到下一行。把一个file用于for … in file这样的语句时，就是调用next()函数来实现遍历的。
-    fp.seek(offset[,whence])                # 将文件打操作标记移到offset的位置。whence可以为0表示从头开始计算，1表示以当前位置为原点计算。2表示以文件末尾为原点进行计算。
+    fp.seek(offset[,whence])                # 将文件打开操作标记移到offset的位置。whence为0表示从头开始计算，1表示以当前位置为原点计算。2表示以文件末尾为原点进行计算。
     fp.seekable()                           # 是否可以seek
     fp.truncate([size])                     # 把文件裁成规定的大小，默认的是裁到当前文件操作标记的位置。
     for line in open('data'): 
         print(line)                         # 使用for语句，比较适用于打开比较大的文件
+    with open('data') as file:
+        print(file.readline())              # 使用with语句，可以保证文件关闭
+    with open('data') as file:
+        lines = file.readlines()            # 一次读入文件所有行，并关闭文件
     open('f.txt', encoding = 'latin-1')     # Python3.x Unicode文本文件
     open('f.bin', 'rb')                     # Python3.x 二进制bytes文件
     # 文件对象还有相应的属性：buffer closed encoding errors line_buffering name newlines等
@@ -368,7 +372,8 @@
     A = 1 if X else 2
     A = 1 if X else (2 if Y else 3)
     # 也可以使用and-or语句（一条语句实现多个if-else）
-    result = (a > 20 and "big than 20" or a > 10 and "big than 10" or a > 5 and "big than 5")
+    a = 6
+    result = (a > 20 and "big than 20" or a > 10 and "big than 10" or a > 5 and "big than 5")    # 返回"big than 5"
 
 #-- Python的while语句或者for语句可以带else语句 当然也可以带continue/break/pass语句
     while a > 1:
@@ -416,7 +421,7 @@
         function document
         """
         print()
-    class Employee:
+    class Employee(object):
         """
         class document
         """
@@ -661,7 +666,7 @@
     str([object])                       # 转换为string类型
     sorted(iterable[, cmp[, key[, reverse]]])             # 集合排序
         L = [('b',2),('a',1),('c',3),('d',4)]
-        sorted(L, key=lambda x: x[1]), reverse=True)      # 使用Key参数和reverse参数
+        sorted(L, key=lambda x: x[1], reverse=True)       # 使用Key参数和reverse参数
         sorted(L, key=lambda x: (x[0], x[1]))             # 使用key参数进行多条件排序，即如果x[0]相同，则比较x[1]
 
     """逻辑判断"""
@@ -671,7 +676,8 @@
 
     """IO操作"""
     file(filename [, mode [, bufsize]]) # file类型的构造函数。
-    input([prompt])                     # 获取用户输入，推荐使用raw_input，因为该函数将不会捕获用户的错误输入
+    input([prompt])                     # 获取用户输入，推荐使用raw_input，因为该函数将不会捕获用户的错误输入，意思是自行判断类型
+    # 在 Built-in Functions 里有一句话是这样写的：Consider using the raw_input() function for general input from users.
     raw_input([prompt])                 # 设置输入，输入都是作为字符串处理
     open(name[, mode[, buffering]])     # 打开文件，与file有什么不同？推荐使用open
     
@@ -710,7 +716,7 @@
     repr(object)                        # 将一个对象变幻为可打印的格式
     slice(start, stop[, step])          # 产生分片对象
     type(object)                        # 返回该object的类型
-    vars([object])                      # 返回对象的变量名、变量值得字典
+    vars([object])                      # 返回对象的变量名、变量值的字典
         a = Class();                    # Class为一个空类
         a.name = 'qi', a.age = 9
         vars(a)                         # {'name':'qi', 'age':9}
@@ -763,8 +769,8 @@
     """
     
 #-- 包相对导入:使用点号(.) 只能使用from语句
-    from . import spam                  # 导入当前目录下的spam模块（错误: 当前目录下的模块, 直接导入即可）
-    from .spam import name              # 导入当前目录下的spam模块的name属性（错误: 当前目录下的模块, 直接导入即可，不用加.）
+    from . import spam                  # 导入当前目录下的spam模块（Python2: 当前目录下的模块, 直接导入即可）
+    from .spam import name              # 导入当前目录下的spam模块的name属性（Python2: 当前目录下的模块, 直接导入即可，不用加.）
     from .. import spam                 # 导入当前目录的父目录下的spam模块
     
 #-- 包相对导入与普通导入的区别
@@ -807,7 +813,7 @@
     I1 = C1('bob')
     
 #-- Python的类没有基于参数的函数重载
-    class FirstClass:
+    class FirstClass(object):
         def test(self, string):
             print(string)
         def test(self):                 # 此时类中只有一个test函数 即后者test(self) 它覆盖掉前者带参数的test函数
@@ -828,7 +834,7 @@
 #-- 返回1中 数据属性spam是属于类 而不是对象
     I1 = C1('bob'); I2 = C2('tom')      # 此时I1和I2的spam都为42 但是都是返回的C1的spam属性
     C1.spam = 24                        # 此时I1和I2的spam都为24
-    I1.spam = 3                         # 此时I1新增自有属性spam 值为2 I2和C1的spam还都为24
+    I1.spam = 3                         # 此时I1新增自有属性spam 值为3 I2和C1的spam还都为24
     
 #-- 类方法调用的两种方式
     instance.method(arg...)
@@ -857,7 +863,7 @@
     pass
     # OOP和委托: "包装"对象 在Python中委托通常是以"__getattr__"钩子方法实现的, 这个方法会拦截对不存在属性的读取
     # 包装类(或者称为代理类)可以使用__getattr__把任意读取转发给被包装的对象
-    class wrapper:
+    class wrapper(object):
         def __init__(self, object):
             self.wrapped = object
         def __getattr(self, attrname):
@@ -870,7 +876,7 @@
     list(x.keys())                      # 返回 "Trace: keys" ['a', 'b']
 
 #-- 类的伪私有属性:使用__attr
-    class C1:
+    class C1(object):
         def __init__(self, name):
             self.__name = name          # 此时类的__name属性为伪私有属性 原理 它会自动变成self._C1__name = name
         def __str__(self):
@@ -881,7 +887,7 @@
     I._C1__name = 'jeey'                # 这里可以修改成功 self.name = jeey
     
 #-- 类方法是对象:无绑定类方法对象 / 绑定实例方法对象
-    class Spam:
+    class Spam(object):
         def doit(self, message):
             print(message)
         def selfless(message)
@@ -891,7 +897,7 @@
     x('hello world')
     x = Spam.doit                       # 类的无绑定方法对象 类名 + 函数
     x(obj, 'hello world')
-    x = Spam.selfless                   # 类的无绑定方法是函数 在3.0之前无效
+    x = Spam.selfless                   # 类的无绑定方法函数 在3.0之前无效
     x('hello world')
 
 #-- 获取对象信息: 属性和方法
@@ -945,7 +951,7 @@
     fooChild.bar('HelloWorld')
     
 #-- #实例方法 / 静态方法 / 类方法
-    class Methods:
+    class Methods(object):
         def imeth(self, x): print(self, x)      # 实例方法：传入的是实例和数据，操作的是实例的属性
         def smeth(x): print(x)                  # 静态方法：只传入数据 不传入实例，操作的是类的属性而不是实例的属性
         def cmeth(cls, x): print(cls, x)        # 类方法：传入的是类对象和数据
@@ -975,13 +981,13 @@
 #-- 类修饰器:是它后边的类的运行时的声明 由@符号以及后边紧跟的"元函数"(metafunction)组成
         def decorator(aClass):.....
         @decorator
-        class C:....
+        class C(object):....
     # 等同于:
-        class C:....
+        class C(object):....
         C = decorator(C)
 
 #-- 限制class属性: __slots__属性
-    class Student:
+    class Student(object):
         __slots__ = ('name', 'age')             # 限制Student及其实例只能拥有name和age属性
     # __slots__属性只对当前类起作用, 对其子类不起作用
     # __slots__属性能够节省内存
@@ -1082,8 +1088,7 @@
     # 动态类型语言中 类可以动态创建 type函数可用于创建新类型
         def fn(self, name='world'):           # 先定义函数
             print('Hello, %s.' % name)
-        Hello = type('Hello', (object,), dict(hello=fn)) 
-        # 创建Hello类 type原型: type(name, bases, dict)
+        Hello = type('Hello', (object,), dict(hello=fn))    # 创建Hello类 type原型: type(name, bases, dict)
         h = Hello()                           # 此时的h和上边的h一致
 
 
